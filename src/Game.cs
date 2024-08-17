@@ -175,17 +175,14 @@ sealed class Game
             }
         }
 
-        var sysrect = squares[0, 0].rectangle.ToSysRect();
-
-
         for (int row = 0; row < 4; row++)
         {
-            var b = blockers[row, 0];
+            blockers[row, 0].Draw(radius);
         }
 
         for (int col = 0; col < 4; col++)
         {
-            var b = blockers[0, col];
+            blockers[0, col].Draw(radius);
         }
 
         shooter.Draw(radius);
