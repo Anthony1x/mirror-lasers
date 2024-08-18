@@ -5,14 +5,14 @@ namespace mirror_lasers;
 
 public class Square
 {
-    public Rectangle rectangle;
+    public Rectangle Rectangle;
 
     public Square(Rectangle rectangle)
     {
-        this.rectangle = rectangle;
+        Rectangle = rectangle;
 
-        this.rectangle.X -= rectangle.Width / 2;
-        this.rectangle.Y -= rectangle.Height / 2;
+        Rectangle.X -= rectangle.Width / 2;
+        Rectangle.Y -= rectangle.Height / 2;
     }
 
     public void Update()
@@ -22,8 +22,6 @@ public class Square
 
     public void Draw(float lineThick)
     {
-        // Raylib.DrawRectangleLines((int)rectangle.X, (int)rectangle.Y, (int)rectangle.Width, (int)rectangle.Height, Color.Red);
-
-        Raylib.DrawRectangleLinesEx(rectangle,lineThick, Color.RayWhite);
+        Raylib.DrawRectangleLinesEx(Rectangle, lineThick, Color.RayWhite);
     }
 }

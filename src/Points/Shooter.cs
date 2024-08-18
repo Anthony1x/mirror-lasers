@@ -8,5 +8,5 @@ class Shooter : Point
     {
     }
 
-    public Shooter(){}
+    public Shooter() { }
 }

@@ -6,57 +6,59 @@ namespace mirror_lasers;
 
 sealed class Game
 {
-    private static readonly Lazy<Game> lazy = new(() => new Game());
-    public static Game Instance { get { return lazy.Value; } }
+    private static readonly Lazy<Game> Lazy = new(() => new Game());
+    public static Game Instance { get { return Lazy.Value; } }
 
-    public Square[,] squares = new Square[5, 5];
+    public Square[,] Squares = new Square[5, 5];
 
-    public int rows;
-    public int columns;
+    public int Rows;
+    public int Columns;
 
-    public Vector2<int> WindowSize;
-    public Vector2<int> middle;
+    public int WindowWidth, WindowHeight;
+    public int MiddleX, MiddleY;
 
-    Camera camera = new();
+    readonly Camera Camera = new();
 
     /// <summary>
     /// We know that there will never be more than 16 blockers, so we may as well initialize it as such.
     /// </summary>
-    public Blocker[,] blockers = new Blocker[4, 4];
+    public Blocker[,] Blockers = new Blocker[4, 4];
 
     // Shooter is initialized in Init()
-    public Shooter shooter = new Shooter();
+    public Shooter Shooter = new Shooter();
 
-    public Target[,] targets = new Target[5, 5];
+    public Target[,] Targets = new Target[5, 5];
 
     private Game()
     {
-        rows = squares.GetLength(0);
-        columns = squares.GetLength(1);
+        Rows = Squares.GetLength(0);
+        Columns = Squares.GetLength(1);
     }
 
-    public void Init(Vector2<int> windowSize)
+    public void Init(int windowWidth, int windowHeight)
     {
-        WindowSize = windowSize;
-        middle = new(WindowSize.X / 2, WindowSize.Y / 2);
+        WindowWidth = windowWidth;
+        WindowHeight = windowHeight;
+        MiddleX = windowWidth / 2;
+        MiddleY = windowHeight / 2;
 
-        InitWindow(WindowSize.X, WindowSize.Y, "Mirror lasers");
+        InitWindow(WindowWidth, WindowHeight, "Mirror lasers");
 
         SetTargetFPS(360);
 
-        var sides = windowSize.Y / 100 * 98;
+        var sides = WindowHeight / 100 * 98;
 
-        Parallel.For(0, rows, row =>
+        Parallel.For(0, Rows, row =>
         {
-            for (int col = 0; col < columns; col++)
+            for (int col = 0; col < Columns; col++)
             {
                 // Adjust the offset calculation to accommodate both row and column
-                var offsetX = col * sides;
-                var offsetY = row * sides;
+                int offsetX = col * sides;
+                int offsetY = row * sides;
 
-                squares[row, col] = new Square(new Rectangle(middle.X + offsetX, middle.Y - offsetY, sides, sides));
+                Squares[row, col] = new Square(new Rectangle(MiddleX + offsetX, MiddleY - offsetY, sides, sides));
 
-                var rectangle = squares[row, col].rectangle.ToSysRect();
+                var rectangle = Squares[row, col].Rectangle.ToSysRect();
 
                 bool flippedVertically = col % 2 == 0;
                 bool flippedHorizontally = row % 2 == 0;
@@ -84,7 +86,7 @@ sealed class Game
                 float targetPosY = .5f;
 
                 // Absolutely INSANE code copied from ChatGPT that mirrors the points if their tile is uneven.
-                targets[row, col] = new Target(
+                Targets[row, col] = new Target(
                     new(
                         flippedVertically ? targetPosX : 1 - targetPosX,
                         flippedHorizontally ? targetPosY : 1 - targetPosY),
@@ -96,77 +98,68 @@ sealed class Game
             }
         });
 
-        // Blockers. Yee haw!
+        var rect = Squares[0, 0].Rectangle.ToSysRect();
+        GeneralUtility.MainSquare = rect;
+
+        Shooter = new Shooter(new(0.1f, 0.7f), 10f, Color.Green, rect);
+
         Parallel.For(0, 4, row =>
         {
-            blockers[row, 0] = new Blocker(new(0, 0), 10f, Color.Orange);
+            for (int col = 0; col < 4; col++)
+            {
+                Blockers[row, col] = new Blocker(new(0, 0), 10f, Color.Orange);
+            }
         });
 
-        Parallel.For(0, 4, col =>
-        {
-            blockers[0, col] = new Blocker(new(0, 0), 10f, Color.Orange);
-        });
-
-        var rect = squares[0, 0].rectangle.ToSysRect();
-        GeneralUtility.mainSquare = rect;
-
-        shooter = new Shooter(new(0.1f, 0.7f), 10f, Color.Green, rect);
     }
 
     public void Update()
     {
-        var sysrect = squares[0, 0].rectangle.ToSysRect();
-
-
-        Parallel.For(0, rows, row =>
+        Parallel.For(0, Rows, row =>
         {
-            for (int col = 0; col < columns; col++)
+            for (int col = 0; col < Columns; col++)
             {
-                squares[row, col].Update();
-                targets[row, col].Update();
+                Squares[row, col].Update();
+                Targets[row, col].Update();
             }
         });
 
         // Blockers. Yee haw!
         Parallel.For(0, 4, row =>
         {
-            blockers[row, 0].DrawnPoint = GeneralUtility.Midpoint(shooter.DrawnPoint, targets[row, 0].DrawnPoint).ToPoint();
+            for (int col = 0; col < 4; col++)
+            {
+                var b = Blockers[row, col];
 
-            blockers[row, 0].Update();
+                b.DrawnPoint = GeneralUtility.Midpoint(Shooter.DrawnPoint, Targets[row, col].DrawnPoint).ToPoint();
 
-            blockers[row, 0].TranslateToOrigin(sysrect);
+                b.Update();
+
+                b.TranslateToOrigin(GeneralUtility.MainSquare);
+            }
         });
 
-        Parallel.For(0, 4, col =>
-        {
-            blockers[0, col].DrawnPoint = GeneralUtility.Midpoint(shooter.DrawnPoint, targets[0, col].DrawnPoint).ToPoint();
-
-            blockers[0, col].Update();
-
-            blockers[0, col].TranslateToOrigin(sysrect);
-        });
-
-        shooter.Update();
-        camera.Update();
+        Shooter.Update();
+        Camera.Update();
     }
 
     public void Draw()
     {
         BeginDrawing();
         ClearBackground(Color.Black);
-        BeginMode2D(camera.GetCamera());
+        BeginMode2D(Camera.GetCamera());
 
-        var radius = Math.Min(10f, targets[0, 0].Radius / camera.GetCamera().Zoom);
+        var radius = Math.Min(10f, Targets[0, 0].Radius / Camera.GetCamera().Zoom);
 
-        for (int row = 0; row < rows; row++)
+        for (int row = 0; row < Rows; row++)
         {
-            for (int col = 0; col < columns; col++)
+            for (int col = 0; col < Columns; col++)
             {
                 // Make sure all lines are always exactly one pixel wide, no matter the zoom.
                 // Otherwise, the lines disappear (less than 1 pixel wide can't be displayed).
                 // Shame Raylib doesn't handle this by itself.
-                squares[row, col].Draw(1 / camera.GetCamera().Zoom);
-                targets[row, col].Draw(radius);
+                Squares[row, col].Draw(1 / Camera.GetCamera().Zoom);
+                Targets[row, col].Draw(radius);
 
                 // var midPoint = GeneralUtility.Midpoint(shooter.DrawnPoint, targets[row, col].DrawnPoint).ToPoint();
 
@@ -177,15 +170,13 @@ sealed class Game
 
         for (int row = 0; row < 4; row++)
         {
-            blockers[row, 0].Draw(radius);
+            for (int col = 0; col < 4; col++)
+            {
+                Blockers[row, col].Draw(radius);
+            }
         }
 
-        for (int col = 0; col < 4; col++)
-        {
-            blockers[0, col].Draw(radius);
-        }
-
-        shooter.Draw(radius);
+        Shooter.Draw(radius);
 
         EndMode2D();
         EndDrawing();

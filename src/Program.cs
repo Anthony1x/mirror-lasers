@@ -27,7 +27,7 @@ class Program
     {
         Game game = Game.Instance;
 
-        game.Init(new(1920, 1080));
+        game.Init(1920, 1080);
 
         while (!WindowShouldClose())
         {

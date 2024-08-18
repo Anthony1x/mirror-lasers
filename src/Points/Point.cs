@@ -15,7 +15,6 @@ public abstract class Point
 
     protected System.Drawing.Rectangle Constraints;
 
-
     public Point(System.Drawing.PointF point, float radius, Color color, System.Drawing.Rectangle constraints)
     {
         RealPoint = point;

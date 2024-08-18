@@ -12,7 +12,7 @@ class Target : Point
         MirroredBoth
     }
 
-    FlippedState MirroredState;
+    readonly FlippedState MirroredState;
 
     public Target(System.Drawing.PointF point, float radius, Color color, System.Drawing.Rectangle constraints, FlippedState mirroredState) : base(point, radius, color, constraints)
     {

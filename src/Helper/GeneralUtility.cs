@@ -6,44 +6,32 @@ namespace mirror_lasers;
 
 public static class GeneralUtility
 {
-    public static System.Drawing.Rectangle mainSquare;
+    public static System.Drawing.Rectangle MainSquare;
 
     public static (float x, float y) ConvertRelativeToAbsolute(float relativeX, float relativeY, int squareWidth, int squareHeight)
     {
         Game game = Game.Instance;
 
         // Calculate the conversion factors based on the square's dimensions and the screen's dimensions
-        float scaleX = squareWidth / game.WindowSize.X;
-        float scaleY = squareHeight / game.WindowSize.Y;
+        float scaleX = squareWidth / game.WindowWidth;
+        float scaleY = squareHeight / game.WindowHeight;
 
         // Adjust the relative coordinates to account for the square's position on the screen
-        float adjustedRelativeX = relativeX - game.middle.X / game.WindowSize.X;
-        float adjustedRelativeY = relativeY - game.middle.Y / game.WindowSize.Y;
+        float adjustedRelativeX = relativeX - game.MiddleX / game.WindowWidth;
+        float adjustedRelativeY = relativeY - game.MiddleY / game.WindowHeight;
 
         // Apply the conversion to the adjusted coordinates
-        float worldX = adjustedRelativeX * scaleX + game.middle.X;
-        float worldY = adjustedRelativeY * scaleY + game.middle.Y;
+        float worldX = adjustedRelativeX * scaleX + game.MiddleX;
+        float worldY = adjustedRelativeY * scaleY + game.MiddleY;
 
         return (worldX, worldY);
-    }
-
-    public static System.Drawing.Point ToMainSquare(System.Drawing.Point point)
-    {
-        var distance = CalculateTileDistances(point);
-
-        var x = distance.Item1;
-        var y = distance.Item2;
-
-        // Point is already at (0,0). Nothing to do.
-        // if (x == 0 && y == 0)
-        return point;
     }
 
     public static Tuple<int, int> CalculateTileDistances(System.Drawing.Point targetPoint)
     {
         // Assuming gridBounds is a square rectangle with equal width and height
-        int tileSize = Math.Min(mainSquare.Width, mainSquare.Height); // Size of a single tile
-        int halfGridSize = mainSquare.Width / 2; // Center of the grid in X direction
+        int tileSize = Math.Min(MainSquare.Width, MainSquare.Height); // Size of a single tile
+        int halfGridSize = MainSquare.Width / 2; // Center of the grid in X direction
 
         // Initialize tile distances
         int tileXDistance = 0;
@@ -56,9 +44,9 @@ public static class GeneralUtility
         }
 
         // Check if the point's Y coordinate exceeds the bottom boundary of the grid
-        if (targetPoint.Y > mainSquare.Bottom - tileSize)
+        if (targetPoint.Y > MainSquare.Bottom - tileSize)
         {
-            tileYDistance += (int)Math.Ceiling((double)(targetPoint.Y - (mainSquare.Bottom - tileSize)) / tileSize) + 1;
+            tileYDistance += (int)Math.Ceiling((double)(targetPoint.Y - (MainSquare.Bottom - tileSize)) / tileSize) + 1;
         }
 
         // Return the distances as a Tuple<int, int>
