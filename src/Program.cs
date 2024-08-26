@@ -1,6 +1,5 @@
 ﻿using static Raylib_cs.Raylib;
 
-namespace mirror_lasers;
 /*
     TODO:
     - Important: GET THE BLOCKERS ON (0,0)
@@ -23,11 +22,28 @@ namespace mirror_lasers;
 
 class Program
 {
+    enum Project
+    {
+        mirror_lasers,
+        sorting_algorithms
+    }
+
     public static void Main()
     {
-        Game game = Game.Instance;
+        Project project = Project.sorting_algorithms;
 
-        game.Init(1920, 1080);
+        dynamic game;
+
+        if (project == Project.mirror_lasers)
+        {
+            game = mirror_lasers.Game.Instance;
+        }
+        else
+        {
+            game = new sorting_algorithms.Game(1920,1080);
+        }
+
+        game.Init();
 
         while (!WindowShouldClose())
         {
