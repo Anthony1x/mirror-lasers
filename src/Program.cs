@@ -1,4 +1,5 @@
-﻿using static Raylib_cs.Raylib;
+﻿using Raylib_cs;
+using static Raylib_cs.Raylib;
 
 /*
     TODO:
@@ -22,26 +23,14 @@
 
 class Program
 {
-    enum Project
-    {
-        mirror_lasers,
-        sorting_algorithms
-    }
-
     public static void Main(string[] args)
     {
-        Project project = Project.mirror_lasers;
-
-        dynamic game;
-
-        if (project == Project.mirror_lasers)
+        dynamic game = args[0] switch
         {
-            game = new mirror_lasers.Game(1920,1080);
-        }
-        else
-        {
-            game = new sorting_algorithms.Game(1920, 1080);
-        }
+            "mirror-lasers" => new mirror_lasers.Game(1920, 1080),
+            "sorting-algorithms" => new sorting_algorithms.Game(1920, 1080),
+            _ => throw new Exception("Invalid project specified, dumbass"),
+        };
 
         game.Init();
 

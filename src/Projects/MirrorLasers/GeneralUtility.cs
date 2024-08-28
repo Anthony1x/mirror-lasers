@@ -82,7 +82,6 @@ public static class GeneralUtility
         {
             System.Drawing.Point? right = GetIntersection(startPoint, endPoint, MainSquare.RightBound().Item1, MainSquare.RightBound().Item2);
 
-
             // Get the inflection point for all sides of the square.
             // We need this to figure out where the next line needs to start drawing.
 
