@@ -1,3 +1,4 @@
+using System.Numerics;
 using ExtensionMethods;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
@@ -6,9 +7,6 @@ namespace mirror_lasers;
 
 sealed class Game
 {
-    private static readonly Lazy<Game> Lazy = new(() => new Game());
-    public static Game Instance { get { return Lazy.Value; } }
-
     public Square[,] Squares = new Square[5, 5];
 
     public int Rows;
@@ -29,18 +27,20 @@ sealed class Game
 
     public Target[,] Targets = new Target[5, 5];
 
-    private Game()
-    {
-        Rows = Squares.GetLength(0);
-        Columns = Squares.GetLength(1);
-    }
-
-    public void Init(int windowWidth, int windowHeight)
+    public Game(int windowWidth, int windowHeight)
     {
         WindowWidth = windowWidth;
         WindowHeight = windowHeight;
         MiddleX = windowWidth / 2;
         MiddleY = windowHeight / 2;
+
+        Rows = Squares.GetLength(0);
+        Columns = Squares.GetLength(1);
+    }
+
+    public void Init()
+    {
+
 
         InitWindow(WindowWidth, WindowHeight, "Mirror lasers");
 
@@ -110,7 +110,6 @@ sealed class Game
                 Blockers[row, col] = new Blocker(new(0, 0), 10f, Color.Orange);
             }
         });
-
     }
 
     public void Update()
@@ -161,10 +160,12 @@ sealed class Game
                 Squares[row, col].Draw(1 / Camera.GetCamera().Zoom);
                 Targets[row, col].Draw(radius);
 
-                // var midPoint = GeneralUtility.Midpoint(shooter.DrawnPoint, targets[row, col].DrawnPoint).ToPoint();
+                GeneralUtility.GetLinesToDraw(Shooter.DrawnPoint, Targets[row, col].DrawnPoint);
 
-                // DrawLine(shooter.DrawnPoint.X, shooter.DrawnPoint.Y, midPoint.X, midPoint.Y, Color.Red);
-                // DrawLine(midPoint.X, midPoint.Y, targets[row, col].DrawnPoint.X, targets[row, col].DrawnPoint.Y, Color.DarkGray);
+                var midPoint = GeneralUtility.Midpoint(Shooter.DrawnPoint, Targets[row, col].DrawnPoint).ToPoint();
+
+                // DrawLine(Shooter.DrawnPoint.X, Shooter.DrawnPoint.Y, midPoint.X, midPoint.Y, Color.Red);
+                // DrawLine(midPoint.X, midPoint.Y, Targets[row, col].DrawnPoint.X, Targets[row, col].DrawnPoint.Y, Color.DarkGray);
             }
         }
 
@@ -172,13 +173,22 @@ sealed class Game
         {
             for (int col = 0; col < 4; col++)
             {
+                var point = Blockers[row, col].DrawnPoint;
+
+                // var midPoint = GeneralUtility.Midpoint(Shooter.DrawnPoint, Blockers[row, col].DrawnPoint).ToPoint();
+                // DrawLine(Shooter.DrawnPoint.X, Shooter.DrawnPoint.Y, point.X, point.Y, Color.Red);
+
                 Blockers[row, col].Draw(radius);
             }
         }
 
         Shooter.Draw(radius);
 
+
         EndMode2D();
+
+        DrawText($"Camera center: {Camera.GetCamera().Target.X},{Camera.GetCamera().Target.Y}", 20, 20, 20, Color.RayWhite);
+
         EndDrawing();
     }
 }

@@ -54,4 +54,6 @@ public static class ExtensionMethods
     public static PointF ToPointF(this Point point) => new PointF(point.X, point.Y);
 
     public static Rectangle ToSysRect(this Raylib_cs.Rectangle rayRect) => new((int)rayRect.X, (int)rayRect.Y, (int)rayRect.Width, (int)rayRect.Height);
+
+    public static Tuple<Point, Point> RightBound(this Rectangle rectangle) => new Tuple<Point, Point>(new(rectangle.X + rectangle.Width, rectangle.Y), new(rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height));
 }

@@ -28,19 +28,19 @@ class Program
         sorting_algorithms
     }
 
-    public static void Main()
+    public static void Main(string[] args)
     {
-        Project project = Project.sorting_algorithms;
+        Project project = Project.mirror_lasers;
 
         dynamic game;
 
         if (project == Project.mirror_lasers)
         {
-            game = mirror_lasers.Game.Instance;
+            game = new mirror_lasers.Game(1920,1080);
         }
         else
         {
-            game = new sorting_algorithms.Game(1920,1080);
+            game = new sorting_algorithms.Game(1920, 1080);
         }
 
         game.Init();
